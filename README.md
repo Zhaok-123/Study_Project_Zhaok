@@ -227,3 +227,26 @@
 （1）加入频率等特征，构造新的数据集，给xgboost全部的特征，做好公平的对比；
 （2）分析结果的错误组成和区域偏好性；
 ```
+
+## 26年9月中汇报
+```md
+（1）复盘前期路线A/B的结构探索与消融结果，当前继续堆模型结构的收益已经比较有限，因此这一阶段把重点转向“补齐数据证据、重新构建更完整的数据集”，为后续模型公平比较和继续优化打基础；
+
+（2）完成V2版本特征字段的系统筛选与冻结。在保留原有核心特征的基础上，重点补充完整多等位位点证据，包括完整AD、完整PL及current-ALT marginal PL、其它ALT支持度、* spanning-deletion信息、MGI merged-cohort频率、phase相关信息、indel/repeat关系，以及GIAB困难区域raw tracks等；同时明确哪些字段作为核心特征、候选特征和审计字段，避免把语义不可靠的merged INFO直接用于模型；
+
+（3）完成V2数据集构建流程和数据结构设计。当前数据仍以targets、alleles、sequences、run_calls为主要模型数据层，同时新增source_records/source_calls保存原始多等位证据与溯源关系；冻结50个独立个体、123次MGI重复测序作为当前构建cohort，并完成chr1-22原始数据完整性与输入范围审核；
+
+（4）搭建并逐步验证V2数据构建流水线，包括资源/染色体manifest、稳定ID、source→canonical allele映射、AD/PL派生、cohort频率、GIAB、run_call/target组装、历史V1回归验证以及checkpoint/resume等。当前已在chr22少量真实样例上跑通source evidence到target的链路，source映射、AD/PL、频率及GIAB等验证通过，正在补齐context重建验证，之后再扩大到整条chr22和全染色体构建。
+
+下一阶段计划：
+（1）近期1~2周内完成V2 context闭环验证，随后进行chr22完整pilot和chr1-22正式V2数据集构建，加入已经冻结的频率及新增证据字段；
+
+（2）基于同一套V2数据做公平基线比较：增强XGBoost，并与当前最佳深度模型统一特征、划分和评估口径，分别比较baseline、单独新增特征和联合特征方案，明确各类特征的真实贡献；
+
+（3）系统分析模型错误组成和区域偏好：区分普通区域与all difficult region，统一统计F1、纠正率、dosage correction、newly wrong/new error等指标，并进一步分析错误类型、难例集中区域和空间聚集现象；
+
+（4）重点控制new error，在完成错误分析后再针对性调整loss、采样/训练策略、概率校准与纠错决策阈值；同时尝试把“是否存在变异”和“剂量判断”进一步解耦，围绕AD等关键证据设计更细的门控或两阶段方案；
+
+（5）10月后根据错误相关性和上述实验结果再决定是否继续做更复杂的多变异联合建模、Context-native/Masked Modeling等扩展，不再单纯为了模型复杂度继续堆结构。
+```
+
